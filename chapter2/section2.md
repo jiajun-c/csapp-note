@@ -64,4 +64,7 @@ int main() {
  Q: why use the %.2x
  A: Because every byte have 8 bits while the 16 only takes 4 bits, so we need two number to record it.
 
+### 1.6 The boolean algebra
+In is mainly about the ^ ~ | &
 
+### 
