@@ -1,176 +1,202 @@
 	.file	"2_4.c"
 	.text
-	.section	.rodata.str1.1,"aMS",@progbits,1
+	.section	.rodata
 .LC0:
 	.string	"%.2x"
 	.text
 	.globl	show_byte
 	.type	show_byte, @function
 show_byte:
-.LFB34:
+.LFB0:
 	.cfi_startproc
 	endbr64
-	pushq	%r12
-	.cfi_def_cfa_offset 16
-	.cfi_offset 12, -16
 	pushq	%rbp
-	.cfi_def_cfa_offset 24
-	.cfi_offset 6, -24
-	pushq	%rbx
-	.cfi_def_cfa_offset 32
-	.cfi_offset 3, -32
-	movq	%rdi, %r12
-	movq	%rsi, %rbp
-	movl	$0, %ebx
-.L2:
-	movslq	%ebx, %rax
-	cmpq	%rbp, %rax
-	jnb	.L5
-	movzbl	(%r12,%rax), %edx
-	leaq	.LC0(%rip), %rsi
-	movl	$1, %edi
-	movl	$0, %eax
-	call	__printf_chk@PLT
-	addl	$1, %ebx
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$32, %rsp
+	movq	%rdi, -24(%rbp)
+	movq	%rsi, -32(%rbp)
+	movl	$0, -4(%rbp)
 	jmp	.L2
-.L5:
+.L3:
+	movl	-4(%rbp), %eax
+	movslq	%eax, %rdx
+	movq	-24(%rbp), %rax
+	addq	%rdx, %rax
+	movzbl	(%rax), %eax
+	movzbl	%al, %eax
+	movl	%eax, %esi
+	leaq	.LC0(%rip), %rdi
+	movl	$0, %eax
+	call	printf@PLT
+	addl	$1, -4(%rbp)
+.L2:
+	movl	-4(%rbp), %eax
+	cltq
+	cmpq	%rax, -32(%rbp)
+	ja	.L3
 	movl	$10, %edi
 	call	putchar@PLT
-	popq	%rbx
-	.cfi_def_cfa_offset 24
-	popq	%rbp
-	.cfi_def_cfa_offset 16
-	popq	%r12
-	.cfi_def_cfa_offset 8
+	nop
+	leave
+	.cfi_def_cfa 7, 8
 	ret
 	.cfi_endproc
-.LFE34:
+.LFE0:
 	.size	show_byte, .-show_byte
 	.globl	show_int
 	.type	show_int, @function
 show_int:
-.LFB35:
+.LFB1:
 	.cfi_startproc
 	endbr64
-	subq	$24, %rsp
-	.cfi_def_cfa_offset 32
-	movl	%edi, 12(%rsp)
-	leaq	12(%rsp), %rdi
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$16, %rsp
+	movl	%edi, -4(%rbp)
+	leaq	-4(%rbp), %rax
 	movl	$4, %esi
+	movq	%rax, %rdi
 	call	show_byte
-	addq	$24, %rsp
-	.cfi_def_cfa_offset 8
+	nop
+	leave
+	.cfi_def_cfa 7, 8
 	ret
 	.cfi_endproc
-.LFE35:
+.LFE1:
 	.size	show_int, .-show_int
 	.globl	show_float
 	.type	show_float, @function
 show_float:
-.LFB36:
+.LFB2:
 	.cfi_startproc
 	endbr64
-	subq	$24, %rsp
-	.cfi_def_cfa_offset 32
-	movss	%xmm0, 12(%rsp)
-	leaq	12(%rsp), %rdi
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$16, %rsp
+	movss	%xmm0, -4(%rbp)
+	leaq	-4(%rbp), %rax
 	movl	$4, %esi
+	movq	%rax, %rdi
 	call	show_byte
-	addq	$24, %rsp
-	.cfi_def_cfa_offset 8
+	nop
+	leave
+	.cfi_def_cfa 7, 8
 	ret
 	.cfi_endproc
-.LFE36:
+.LFE2:
 	.size	show_float, .-show_float
 	.globl	show_pointer
 	.type	show_pointer, @function
 show_pointer:
-.LFB37:
+.LFB3:
 	.cfi_startproc
 	endbr64
-	subq	$24, %rsp
-	.cfi_def_cfa_offset 32
-	movq	%rdi, 8(%rsp)
-	leaq	8(%rsp), %rdi
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$16, %rsp
+	movq	%rdi, -8(%rbp)
+	leaq	-8(%rbp), %rax
 	movl	$8, %esi
+	movq	%rax, %rdi
 	call	show_byte
-	addq	$24, %rsp
-	.cfi_def_cfa_offset 8
+	nop
+	leave
+	.cfi_def_cfa 7, 8
 	ret
 	.cfi_endproc
-.LFE37:
+.LFE3:
 	.size	show_pointer, .-show_pointer
 	.globl	show_long
 	.type	show_long, @function
 show_long:
-.LFB38:
+.LFB4:
 	.cfi_startproc
 	endbr64
-	subq	$24, %rsp
-	.cfi_def_cfa_offset 32
-	movq	%rdi, 8(%rsp)
-	leaq	8(%rsp), %rdi
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$16, %rsp
+	movq	%rdi, -8(%rbp)
+	leaq	-8(%rbp), %rax
 	movl	$8, %esi
+	movq	%rax, %rdi
 	call	show_byte
-	addq	$24, %rsp
-	.cfi_def_cfa_offset 8
+	nop
+	leave
+	.cfi_def_cfa 7, 8
 	ret
 	.cfi_endproc
-.LFE38:
+.LFE4:
 	.size	show_long, .-show_long
-	.section	.rodata.str1.1
+	.section	.rodata
 .LC1:
 	.string	"mnopqr"
 	.text
 	.globl	main
 	.type	main, @function
 main:
-.LFB39:
+.LFB5:
 	.cfi_startproc
 	endbr64
 	pushq	%rbp
 	.cfi_def_cfa_offset 16
 	.cfi_offset 6, -16
-	pushq	%rbx
-	.cfi_def_cfa_offset 24
-	.cfi_offset 3, -24
-	subq	$24, %rsp
-	.cfi_def_cfa_offset 48
-	movl	$40, %ebp
-	movq	%fs:0(%rbp), %rax
-	movq	%rax, 8(%rsp)
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$32, %rsp
+	movq	%fs:40, %rax
+	movq	%rax, -8(%rbp)
 	xorl	%eax, %eax
-	movl	$305419896, 4(%rsp)
-	leaq	4(%rsp), %rbx
+	movl	$305419896, -28(%rbp)
+	leaq	-28(%rbp), %rax
+	movq	%rax, -24(%rbp)
+	movq	-24(%rbp), %rax
 	movl	$1, %esi
-	movq	%rbx, %rdi
+	movq	%rax, %rdi
 	call	show_byte
+	movq	-24(%rbp), %rax
 	movl	$2, %esi
-	movq	%rbx, %rdi
+	movq	%rax, %rdi
 	call	show_byte
+	movq	-24(%rbp), %rax
 	movl	$3, %esi
-	movq	%rbx, %rdi
+	movq	%rax, %rdi
 	call	show_byte
-	movl	$6, %esi
-	leaq	.LC1(%rip), %rdi
+	leaq	.LC1(%rip), %rax
+	movq	%rax, -16(%rbp)
+	movq	-16(%rbp), %rax
+	movq	%rax, %rdi
+	call	strlen@PLT
+	movq	%rax, %rdx
+	movq	-16(%rbp), %rax
+	movq	%rdx, %rsi
+	movq	%rax, %rdi
 	call	show_byte
-	movq	8(%rsp), %rax
-	xorq	%fs:0(%rbp), %rax
-	jne	.L17
 	movl	$0, %eax
-	addq	$24, %rsp
-	.cfi_remember_state
-	.cfi_def_cfa_offset 24
-	popq	%rbx
-	.cfi_def_cfa_offset 16
-	popq	%rbp
-	.cfi_def_cfa_offset 8
-	ret
-.L17:
-	.cfi_restore_state
+	movq	-8(%rbp), %rcx
+	xorq	%fs:40, %rcx
+	je	.L10
 	call	__stack_chk_fail@PLT
+.L10:
+	leave
+	.cfi_def_cfa 7, 8
+	ret
 	.cfi_endproc
-.LFE39:
+.LFE5:
 	.size	main, .-main
 	.ident	"GCC: (Ubuntu 9.3.0-17ubuntu1~20.04) 9.3.0"
 	.section	.note.GNU-stack,"",@progbits
