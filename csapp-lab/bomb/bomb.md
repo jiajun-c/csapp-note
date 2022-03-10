@@ -1,6 +1,6 @@
 # CSAPP - bomblab
 [TOC]
-## 0. pre 
+## 0. pre
 [the link](http://www.csapp.cs.cmu.edu/3e/labs.html)
 You can go to this website to download the ==self-study handout==
 In the folder, you can see three file, bomb, bomb.c README.md , the extra files are my works.
@@ -34,7 +34,7 @@ Dump of assembler code for function phase_1:
    0x0000000000400ef0 <+16>:	je     0x400ef7 <phase_1+23>
    0x0000000000400ef2 <+18>:	callq  0x40143a <explode_bomb>
    0x0000000000400ef7 <+23>:	add    $0x8,%rsp
-   0x0000000000400efb <+27>:	retq   
+   0x0000000000400efb <+27>:	retq
 End of assembler dump.
 
 ```
@@ -74,7 +74,7 @@ Dump of assembler code for function phase_2:
    0x0000000000400f3c <+64>:	add    $0x28,%rsp
    0x0000000000400f40 <+68>:	pop    %rbx
    0x0000000000400f41 <+69>:	pop    %rbp
-   0x0000000000400f42 <+70>:	retq   
+   0x0000000000400f42 <+70>:	retq
 End of assembler dump.
 ```
 看到上面的`<read_six_numbers>`我们可以知道这次是让我们去输入六个数字
@@ -110,6 +110,7 @@ Dump of assembler code for function phase_3:
    0x0000000000400f6a <+39>:	cmpl   $0x7,0x8(%rsp)
    0x0000000000400f6f <+44>:	ja     0x400fad <phase_3+106>
    0x0000000000400f71 <+46>:	mov    0x8(%rsp),%eax
+
    0x0000000000400f75 <+50>:	jmpq   *0x402470(,%rax,8)
    0x0000000000400f7c <+57>:	mov    $0xcf,%eax
    0x0000000000400f81 <+62>:	jmp    0x400fbe <phase_3+123>
@@ -133,7 +134,7 @@ Dump of assembler code for function phase_3:
    0x0000000000400fc2 <+127>:	je     0x400fc9 <phase_3+134>
    0x0000000000400fc4 <+129>:	callq  0x40143a <explode_bomb>
    0x0000000000400fc9 <+134>:	add    $0x18,%rsp
-   0x0000000000400fcd <+138>:	retq   
+   0x0000000000400fcd <+138>:	retq
 End of assembler dump.
 ```
 The return value of the c function is always storaged in the eax, so the `0x0000000000400f56 <+19>:	mov    $0x0,%eax`
@@ -142,3 +143,144 @@ So we can input two numbers.
 The first number must be less than 7,if the number is 1, it will jump to the `0x0000000000400f81`. In this statement we can see the second number is 311.
 综上所述，我们可以看到最终一个可行的结果是`1 311`
 你也可以选择其他的分支，按照相同的方法得到结果
+
+### 2.4 bomb four
+```shell
+ 0x0000000000401029 <+29>:	cmp    $0x2,%eax
+```
+In this place, we can see the number of the parameters should be two.
+
+```shell
+0x000000000040102e <+34>:	cmpl   $0xe,0x8(%rsp)
+0x0000000000401033 <+39>:	jbe    0x40103a <phase_4+46>
+```
+The phase_4:
+```shell
+=> 0x000000000040100c <+0>:	sub    $0x18,%rsp
+   0x0000000000401010 <+4>:	lea    0xc(%rsp),%rcx
+   0x0000000000401015 <+9>:	lea    0x8(%rsp),%rdx
+   0x000000000040101a <+14>:	mov    $0x4025cf,%esi
+   0x000000000040101f <+19>:	mov    $0x0,%eax
+   0x0000000000401024 <+24>:	callq  0x400bf0 <__isoc99_sscanf@plt>
+   0x0000000000401029 <+29>:	cmp    $0x2,%eax
+   0x000000000040102c <+32>:	jne    0x401035 <phase_4+41>
+   0x000000000040102e <+34>:	cmpl   $0xe,0x8(%rsp) ; The first number should be less than 15
+   0x0000000000401033 <+39>:	jbe    0x40103a <phase_4+46>
+   0x0000000000401035 <+41>:	callq  0x40143a <explode_bomb>
+   0x000000000040103a <+46>:	mov    $0xe,%edx
+   0x000000000040103f <+51>:	mov    $0x0,%esi
+   0x0000000000401044 <+56>:	mov    0x8(%rsp),%edi
+   0x0000000000401048 <+60>:	callq  0x400fce <func4>
+   0x000000000040104d <+65>:	test   %eax,%eax
+   0x000000000040104f <+67>:	jne    0x401058 <phase_4+76>
+   0x0000000000401051 <+69>:	cmpl   $0x0,0xc(%rsp)
+   0x0000000000401056 <+74>:	je     0x40105d <phase_4+81>
+   0x0000000000401058 <+76>:	callq  0x40143a <explode_bomb>
+   0x000000000040105d <+81>:	add    $0x18,%rsp
+   0x0000000000401061 <+85>:	retq
+
+```
+
+So the first number should be bigger than 14. In the phase_4, you can 
+see the required return number should be zero.And the second parameter 
+should the zero, the first number should make the func4(0x0, 0xe, x) as 0
+
+```shell
+; func4
+; first call is func4(edx=a, esi=b, edi=x)
+=> 0x0000000000400fce <+0>:	sub    $0x8,%rsp
+   0x0000000000400fd2 <+4>:	mov    %edx,%eax ; eax = a
+   0x0000000000400fd4 <+6>:	sub    %esi,%eax ; eax = a - b = t1
+   0x0000000000400fd6 <+8>:	mov    %eax,%ecx ; ecx = eax = t1
+   0x0000000000400fd8 <+10>:	shr    $0x1f,%ecx ; ecx = ecx >> 31 = t1 >> 31 = t2
+   0x0000000000400fdb <+13>:	add    %ecx,%eax ; eax = eax + ecx = t2 + t1
+   0x0000000000400fdd <+15>:	sar    %eax ; eax = eax >> 1 it is equal to the (t2 + t1)>>1 t1 = (t1 + t2)>>1;
+   0x0000000000400fdf <+17>:	lea    (%rax,%rsi,1),%ecx ; ecx = eax + esi = t1 + b ,t2=t1+b
+   ; because the ecx can only fit the 16
+   0x0000000000400fe2 <+20>:	cmp    %edi,%ecx ; ecx <= x?() :(2*func4())
+   ;
+   0x0000000000400fe4 <+22>:	jle    0x400ff2 <func4+36>
+   0x0000000000400fe6 <+24>:	lea    -0x1(%rcx),%edx ; edx = ecx - 1
+   0x0000000000400fe9 <+27>:	callq  0x400fce <func4>
+   0x0000000000400fee <+32>:	add    %eax,%eax ; (2*func4())
+   0x0000000000400ff0 <+34>:	jmp    0x401007 <func4+57>
+   0x0000000000400ff2 <+36>:	mov    $0x0,%eax ; eax = 0
+   0x0000000000400ff7 <+41>:	cmp    %edi,%ecx ; ecx >= edi ? (return 0) : ()
+   0x0000000000400ff9 <+43>:	jge    0x401007 <func4+57>
+   0x0000000000400ffb <+45>:	lea    0x1(%rcx),%esi
+   0x0000000000400ffe <+48>:	callq  0x400fce <func4>
+   0x0000000000401003 <+53>:	lea    0x1(%rax,%rax,1),%eax
+   0x0000000000401007 <+57>:	add    $0x8,%rsp
+   0x000000000040100b <+61>:	retq
+
+```
+All in all, the ans can be 0,0 ...
+
+## 2.5 The bomb five 
+```shell
+=> 0x0000000000401062 <+0>:	push   %rbx ;push the function into the  
+   0x0000000000401063 <+1>:	sub    $0x20,%rsp; sub 20 from the rsp 
+   0x0000000000401067 <+5>:	mov    %rdi,%rbx ; rbx = rdi 
+   0x000000000040106a <+8>:	mov    %fs:0x28,%rax; 
+   0x0000000000401073 <+17>:	mov    %rax,0x18(%rsp)
+   0x0000000000401078 <+22>:	xor    %eax,%eax
+   0x000000000040107a <+24>:	callq  0x40131b <string_length>
+   0x000000000040107f <+29>:	cmp    $0x6,%eax
+   0x0000000000401082 <+32>:	je     0x4010d2 <phase_5+112>
+   0x0000000000401084 <+34>:	callq  0x40143a <explode_bomb>
+   0x0000000000401089 <+39>:	jmp    0x4010d2 <phase_5+112>
+   0x000000000040108b <+41>:	movzbl (%rbx,%rax,1),%ecx
+   0x000000000040108f <+45>:	mov    %cl,(%rsp)
+   0x0000000000401092 <+48>:	mov    (%rsp),%rdx
+   0x0000000000401096 <+52>:	and    $0xf,%edx ; Get the first four bit from the edx. 
+   0x0000000000401099 <+55>:	movzbl 0x4024b0(%rdx),%edx ; Get the index, storaged in the 0x4024b0 is  maduiersnfotvbyl
+   0x00000000004010a0 <+62>:	mov    %dl,0x10(%rsp,%rax,1)
+   0x00000000004010a4 <+66>:	add    $0x1,%rax
+   0x00000000004010a8 <+70>:	cmp    $0x6,%rax
+   0x00000000004010ac <+74>:	jne    0x40108b <phase_5+41>
+   0x00000000004010ae <+76>:	movb   $0x0,0x16(%rsp)
+   0x00000000004010b3 <+81>:	mov    $0x40245e,%esi ; Storaged in the 0x40245e is 0x40245e
+   0x00000000004010b8 <+86>:	lea    0x10(%rsp),%rdi
+   0x00000000004010bd <+91>:	callq  0x401338 <strings_not_equal>
+   0x00000000004010c2 <+96>:	test   %eax,%eax
+   0x00000000004010c4 <+98>:	je     0x4010d9 <phase_5+119>
+   0x00000000004010c6 <+100>:	callq  0x40143a <explode_bomb>
+   0x00000000004010cb <+105>:	nopl   0x0(%rax,%rax,1)
+   0x00000000004010d0 <+110>:	jmp    0x4010d9 <phase_5+119>
+   0x00000000004010d2 <+112>:	mov    $0x0,%eax
+   0x00000000004010d7 <+117>:	jmp    0x40108b <phase_5+41>
+   0x00000000004010d9 <+119>:	mov    0x18(%rsp),%rax
+   0x00000000004010de <+124>:	xor    %fs:0x28,%rax
+   0x00000000004010e7 <+133>:	je     0x4010ee <phase_5+140>
+   0x00000000004010e9 <+135>:	callq  0x400b30 <__stack_chk_fail@plt>
+   0x00000000004010ee <+140>:	add    $0x20,%rsp
+   0x00000000004010f2 <+144>:	pop    %rbx
+   0x00000000004010f3 <+145>:	retq
+```
+So this bomb, we have a hash map 
+maduiersnfotvbyl 
+So the flyers's numbers are 9, 15, 14, 5, 6 
+Then we can use the `man ascii|grep number` to get the char that and 0xf = number 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
