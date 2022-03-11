@@ -23,3 +23,19 @@ gcc -c hello.s -o hello.o
 gcc hello.o -o prog 
 ```
 gcc complie to the *.s ,the as process it into *.o, the ld process it to the executable file 
+
+## 4. The Optimization
+The gcc has some optimization like the O1, O2
+If you do not use the optimization, the compiler's goal is to reduce the time of the compilation and to make the debugging produce the expected results.
+
+Turning on the optimization flags makes the compiler attempt toimprove the performance and/or code size at the cost of the complication time and the possiblity to debug the program.
+
+The difference of the O2 and O1 is that the O2 turn on more optimization flags than O1.
+
+And the O3 turns on more flags than the O2
+
+-0s
+Optimize for size, -0s enables all -O2 optimizations expect those that often increase code size.
+
+If you wants to learn more about the optimization, go [this](https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html)
+

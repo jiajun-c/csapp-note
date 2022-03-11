@@ -36,7 +36,7 @@ Intel用术语“字”(word)表示16位数据类型，32位为(double words), 6
 ## 4. 访问信息
 在63位的寄存器中都是用r开头，而在32位中都是用e开头表示的是extand
 架构的不同对应着这些东西的变化，8086 -> IA32 -> x86-64
-
+![regisiter](../img/reg.png)
 ### 4.1 操作数指示符
 ![png2](../img/cs2.png)
 各种不同的操作数对应的可能性被分为三种
@@ -69,5 +69,50 @@ Intel用术语“字”(word)表示16位数据类型，32位为(double words), 6
 
 MOVZ类中的指令把目的中剩余的字节填充为0，MOVS类指令通过符号拓展进行填充，把元操作的最高位进行复制
 
+### 4.3 数据传送
+间接引用指针其实就是将指针放在一个寄存器中，然后进行交换。
+需要注意的是像一些局部变量其实是会被放在寄存器中的。
 
+### 4.4 压入和弹出栈数据
+使用push将数据压入到栈中，使用pop将数据弹出
+要注意的是在这个过程中要遵循先进先出的原则。
+将一个数据压入到栈中时，需要将栈的指针减8，然后读如数据
+> 因为在x86-64中数据是小端存放的，所以是减8
 
+## 5 算术和逻辑操作
+指令类ADD由四条加法指令组成
+|command|usage|
+|-|-|
+|addb|字节加法|
+|addw|字加法|
+|addl|双字加法|
+|addq|四字加法|
+![command](../img/command.png)
+
+### 5.1 加载有效地址
+当你使用反汇编去调试C语言的程序时，你会发现我们的程序调用了rbp这个栈帧指针，但是当你使用优化进行编译的时候，这个栈帧数指针可能会消失。
+未开启的时候如下面所示
+```nasm
+ movq    %rdi, -24(%rbp)
+    movq    %rsi, -32(%rbp)
+    movq    %rdx, -40(%rbp)
+    movq    -32(%rbp), %rax
+    leaq    0(,%rax,4), %rdx
+    movq    -24(%rbp), %rax
+    leaq    (%rdx,%rax), %rcx
+    movq    -40(%rbp), %rdx
+    movq    %rdx, %rax
+    addq    %rax, %rax
+    addq    %rdx, %rax
+    salq    $2, %rax
+    addq    %rcx, %rax
+    movq    %rax, -8(%rbp)
+    movq    -8(%rbp), %rax
+    popq    %rbp
+```
+开启的时候如下所示
+```nasm
+leaq    (%rdi,%rsi,4), %rax
+leaq    (%rdx,%rdx,2), %rdx
+leaq    (%rax,%rdx,4), %rax
+```
