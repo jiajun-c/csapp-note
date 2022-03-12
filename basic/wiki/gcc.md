@@ -25,6 +25,10 @@ gcc hello.o -o prog
 gcc complie to the *.s ,the as process it into *.o, the ld process it to the executable file 
 
 ## 4. The Optimization
+> usagae
+```shell
+gcc -O2 -S test.s test.c
+```
 The gcc has some optimization like the O1, O2
 If you do not use the optimization, the compiler's goal is to reduce the time of the compilation and to make the debugging produce the expected results.
 
@@ -39,3 +43,6 @@ Optimize for size, -0s enables all -O2 optimizations expect those that often inc
 
 If you wants to learn more about the optimization, go [this](https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html)
 
+You should be attention that the O2/O1... will clear some code that isn't execulte.
+
+Like if there is a function but the function isn't used in the program ,it will not be compile

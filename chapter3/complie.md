@@ -1,4 +1,6 @@
 # 程序的机器级表示
+
+[TOC]
 ## 1. 历史观点
 因特尔处理器俗称x86,第一代芯片就是我们熟知的8086，8088是8086的一个变种，在8086上增加了一个8位的外部总线。
 后面还出现了i386，i386是linux和最近版本的winddows使用的，增加了平坦寻址模式，是inter系列中唯一一台全面支持unix操作系统的机器
@@ -116,3 +118,62 @@ leaq    (%rdi,%rsi,4), %rax
 leaq    (%rdx,%rdx,2), %rdx
 leaq    (%rax,%rdx,4), %rax
 ```
+So， csapp using the O2
+
+You can find more in the [gcc](../basic/wiki/gcc.md)
+
+### 5.2 一元和二元操作
+
+The operation like the INC... is the unary operations. the operation like the mov is the binary operation
+
+### 5.3 The shfit operation
+I think it is simple...
+## 6 control
+
+### 6.1 The condition code 
+CF: The carry flag 
+ZF: Zero flag 
+SF: Sign flag, it can make the negative number
+OF: Overflow flag, it means the number is overflow, like two negative numbers or
+two positive numbers.
+
+We always use the flag to set the contion 
+
+### 6.2 visit the condition code
+
+## 10. Combining Control and Data in Machine-Level Programs
+### 10.1 understanding pointers 
+Just like c
+
+### 10.2 using GDB 
+![img](../img/gdb.png)
+
+### 10.3 Out-of-Bounds Memory Reference and Buffer Overflow
+
+That's the reason why the gcc advice you to use the fgets instead of the gets.
+Take the function echo for example
+```c
+void echo()
+{
+char buf[8]; /* Way too small! */
+gets(buf);
+puts(buf);
+}
+```
+对它进行反汇编之后可以发现其实知识将栈帧指针减去了一定的数目，相当于分配了八个字节的空间，但是一旦超过之后就会发生越界。
+
+Except from the gets, the library function like the strcpy... also has such problem.
+
+
+### 10.4 Some ways to defend the attack
+1. Random stack
+简单来说，就是每次进行程序的运行，存放的数据的位置都是不同的，一次来对抗对计算机的攻击
+
+2. test the broken stack
+就是在我们的栈中分配一个金丝雀值， 如果我们的栈发生了溢出，由于这个存放的位置是在栈的下方，所以当数据发生溢出的时候，该处的数据将会被修改，当进行xor后，发现此时的数值发生了改变，那么此时就说明发生了栈溢出
+
+3. restrict the area of excultable area
+Only the place where reserved by the translater can have the execute permission.
+
+### 10.5 support the variable length stack frame
+Using the rbp as the frame pointer(base pointer). 
