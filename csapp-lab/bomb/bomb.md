@@ -38,12 +38,14 @@ Dump of assembler code for function phase_1:
 End of assembler dump.
 
 ```
-You can see there is a <strings_not_equal>, if the string you input is not equal to the target one, the bomb wil bome.
-We can guess that the string is storaged in the $0x402400, check the string storaged in the 0x402400, you can get the ans.
+此时有一个<strings_not_equal>,判断输入的字符串和目的串是否是匹配的，目的串被存储在
+esi中，直接打印即可 
+我们将得到如下
 ```shell
-(gdb) x/s 0x402400
-0x402400:	"Border relations with Canada have never been better."
+(gdb) x/s $esi
+0x603780 <input_strings>:	"Border relations with Canada have never been better."
 ```
+
 ### 2.2 bomb two
 同样在phase_2处打下断点，然后进行调试
 ```shell
@@ -80,7 +82,7 @@ End of assembler dump.
 看到上面的`<read_six_numbers>`我们可以知道这次是让我们去输入六个数字
 Then we can see `cmpl   $0x1,(%rsp)`, so the first number is 1, otherwise will trigger the bomb.
 In the next statement, we jump to the `phase_2 + 52`,in which the second number will copy to the rbx.
-Then will get into this loop
+Then will get into this loop.Everytime the number get doubled, so the final ans is 1 2 4 8 16 32
 ```shell
 0x0000000000400f17 <+27>:	mov    -0x4(%rbx),%eax
 0x0000000000400f1a <+30>:	add    %eax,%eax
@@ -90,29 +92,27 @@ Then will get into this loop
 0x0000000000400f25 <+41>:	add    $0x4,%rbx
 0x0000000000400f29 <+45>:	cmp    %rbp,%rbx
 ```
-It will end until there are no number in the rbx, everytime the number will be doubled.
-So the numbers are `1 2 4 8 16 32`
+
 
 ### 2.3 bomb three
 Check the disassemle fisrt.
 ```shell
 (gdb) disas
 Dump of assembler code for function phase_3:
-=> 0x0000000000400f43 <+0>:	sub    $0x18,%rsp
-   0x0000000000400f47 <+4>:	lea    0xc(%rsp),%rcx
-   0x0000000000400f4c <+9>:	lea    0x8(%rsp),%rdx
-   0x0000000000400f51 <+14>:	mov    $0x4025cf,%esi
-   0x0000000000400f56 <+19>:	mov    $0x0,%eax
-   0x0000000000400f5b <+24>:	callq  0x400bf0 <__isoc99_sscanf@plt>
-   0x0000000000400f60 <+29>:	cmp    $0x1,%eax
+=> 0x0000000000400f43 <+0>:	sub    $0x18,%rsp ; 分配栈帧指针 
+   0x0000000000400f47 <+4>:	lea    0xc(%rsp),%rcx ; storage the third parameter in the rcx 
+   0x0000000000400f4c <+9>:	lea    0x8(%rsp),%rdx ; stroage the second parameter in the rdx 
+   0x0000000000400f51 <+14>:	mov    $0x4025cf,%esi ; storaged in the 0x4025f is "%d %d",so pass in two numbers
+   0x0000000000400f56 <+19>:	mov    $0x0,%eax ; clear the eax 
+   0x0000000000400f5b <+24>:	callq  0x400bf0 <__isoc99_sscanf@plt> ;scanf   
+   0x0000000000400f60 <+29>:	cmp    $0x1,%eax ; if the number of the parameter is less tha two,it will bomb 
    0x0000000000400f63 <+32>:	jg     0x400f6a <phase_3+39>
    0x0000000000400f65 <+34>:	callq  0x40143a <explode_bomb>
-   0x0000000000400f6a <+39>:	cmpl   $0x7,0x8(%rsp)
-   0x0000000000400f6f <+44>:	ja     0x400fad <phase_3+106>
+   0x0000000000400f6a <+39>:	cmpl   $0x7,0x8(%rsp) 
+   0x0000000000400f6f <+44>:	ja     0x400fad <phase_3+106> ; if it is bigger than 7 is will bomb, so the first should be in the 0 7
    0x0000000000400f71 <+46>:	mov    0x8(%rsp),%eax
-
-   0x0000000000400f75 <+50>:	jmpq   *0x402470(,%rax,8)
-   0x0000000000400f7c <+57>:	mov    $0xcf,%eax
+   0x0000000000400f75 <+50>:	jmpq   *0x402470(,%rax,8) ; print the message in the 0x402470, you will get 0x400f7c <phase_3+57>:	-72 
+   0x0000000000400f7c <+57>:	mov    $0xcf,%eax ; so it will 
    0x0000000000400f81 <+62>:	jmp    0x400fbe <phase_3+123>
    0x0000000000400f83 <+64>:	mov    $0x2c3,%eax
    0x0000000000400f88 <+69>:	jmp    0x400fbe <phase_3+123>
@@ -137,13 +137,13 @@ Dump of assembler code for function phase_3:
    0x0000000000400fcd <+138>:	retq
 End of assembler dump.
 ```
-The return value of the c function is always storaged in the eax, so the `0x0000000000400f56 <+19>:	mov    $0x0,%eax`
-compare the number of the parameters and the 0x1,it must be bigger than 1.
-So we can input two numbers.
-The first number must be less than 7,if the number is 1, it will jump to the `0x0000000000400f81`. In this statement we can see the second number is 311.
-综上所述，我们可以看到最终一个可行的结果是`1 311`
-你也可以选择其他的分支，按照相同的方法得到结果
-
+输入两个数字，然后根据输入的第一个数字进行跳转，假设输入的第一个是1，那么打印的地址据就是
+```shell  
+(gdb) p/x *(0x402470 + 0x8)
+$8 = 0x400fb9
+``` 
+所以跳转到+118的地方，随后将第二个参数和0x137 进行比较，比较相同则正确
+所以最终的一个可行的解是1 311
 ### 2.4 bomb four
 ```shell
  0x0000000000401029 <+29>:	cmp    $0x2,%eax
@@ -257,124 +257,8 @@ All in all, the ans can be 0,0 ...
    0x00000000004010f2 <+144>:	pop    %rbx
    0x00000000004010f3 <+145>:	retq
 ```
-## 2.6 bomb six
-```shell
-Dump of assembler code for function phase_6:
-=> 0x00000000004010f4 <+0>:	push   %r14
-   0x00000000004010f6 <+2>:	push   %r13
-   0x00000000004010f8 <+4>:	push   %r12
-   0x00000000004010fa <+6>:	push   %rbp
-   0x00000000004010fb <+7>:	push   %rbx
-   0x00000000004010fc <+8>:	sub    $0x50,%rsp
-   0x0000000000401100 <+12>:	mov    %rsp,%r13
-   0x0000000000401103 <+15>:	mov    %rsp,%rsi
-   0x0000000000401106 <+18>:	callq  0x40145c <read_six_numbers>
-   0x000000000040110b <+23>:	mov    %rsp,%r14
-   0x000000000040110e <+26>:	mov    $0x0,%r12d ; set the r12dv to be the zero 
-   0x0000000000401114 <+32>:	mov    %r13,%rbp ; 
-   0x0000000000401117 <+35>:	mov    0x0(%r13),%eax ; move the first number to the eax 
-   0x000000000040111b <+39>:	sub    $0x1,%eax ; eax -= 1
-   0x000000000040111e <+42>:	cmp    $0x5,%eax ; the first number - 1 should be less or equal to the 5
-   0x0000000000401121 <+45>:	jbe    0x401128 <phase_6+52> 
-   0x0000000000401123 <+47>:	callq  0x40143a <explode_bomb> 
-   0x0000000000401128 <+52>:	add    $0x1,%r12d ; r12d++ so we guess it is a count 
-   0x000000000040112c <+56>:	cmp    $0x6,%r12d ; when the r12d is eual to the 6, the loop will end, so the loop
-   ; is for (int i = 1;i <= 6;i++) so we name the r12d as the i 
-   0x0000000000401130 <+60>:	je     0x401153 <phase_6+95> ; 
-   0x0000000000401132 <+62>:	mov    %r12d,%ebx ; move the i to the edx 
-   0x0000000000401135 <+65>:	movslq %ebx,%rax ; move the i to the rax 
-   0x0000000000401138 <+68>:	mov    (%rsp,%rax,4),%eax ; move the a[i] to the eax 
-   0x000000000040113b <+71>:	cmp    %eax,0x0(%rbp) ; complare the eax with the rbp  
-   0x000000000040113e <+74>:	jne    0x401145 <phase_6+81> ; If the eax is equal to the complared elemeny, the bomb will be explored 
-   0x0000000000401140 <+76>:	callq  0x40143a <explode_bomb>
-   0x0000000000401145 <+81>:	add    $0x1,%ebx ; we can set the ebx to be the j, so this loop 
-   ; for (int j = 1;j <= 5;j++) 
-   ; 结合起来大概就是
-   ; for (int i = 0;i < 6;i++) {
-   ;    if(a[i] > 6 ) bomded  
-   ;    for (int j = i + 1;j <= 5;j++) 
-   ;        if(a[i] == a[j]) bomded
-   }
-   ; So the consulation is that every elem should be different adn in the range(0,6)  
-   0x0000000000401148 <+84>:	cmp    $0x5,%ebx 
-   0x000000000040114b <+87>:	jle    0x401135 <phase_6+65>
-   0x000000000040114d <+89>:	add    $0x4,%r13
-   0x0000000000401151 <+93>:	jmp    0x401114 <phase_6+32>
-   0x0000000000401153 <+95>:	lea    0x18(%rsp),%rsi
-   ; 0x18 = 24, so it send the sixth number to the rsi
-   0x0000000000401158 <+100>:	mov    %r14,%rax
-   ; r14 is the address of teh first elem. then we pass it to the rax 
-   0x000000000040115b <+103>:	mov    $0x7,%ecx
-   ; ecx = 7 
-   0x0000000000401160 <+108>:	mov    %ecx,%edx
-   ; edx = 7 
-   0x0000000000401162 <+110>:	sub    (%rax),%edx
-   ; edx = 7 - rax 
-   0x0000000000401164 <+112>:	mov    %edx,(%rax)
-   ; rax = edx 
-   0x0000000000401166 <+114>:	add    $0x4,%rax
-   ; As the rax is the address of the array, so the +4 will make it point to the next elem 
-   0x000000000040116a <+118>:	cmp    %rsi,%rax
-   ; rsi is the last number of the array, so this judge is made to see whether it has achieve the last number
-   0x000000000040116d <+121>:	jne    0x401160 <phase_6+108>
-   ; After it achieve the last elem, the loop will be stop.  
-   0x000000000040116f <+123>:	mov    $0x0,%esi
-   ; esi = 0  
-   0x0000000000401174 <+128>:	jmp    0x401197 <phase_6+163i>
-   0x0000000000401176 <+130>:	mov    0x8(%rdx),%rdx ; rdx = rdx + 8
-   0x000000000040117a <+134>:	add    $0x1,%eax; it is also a count 
-   0x000000000040117d <+137>:	cmp    %ecx,%eax  ; complare the eax with ecx 
-   0x000000000040117f <+139>:	jne    0x401176 <phase_6+130> ; it will run 6 times 
-   0x0000000000401181 <+141>:	jmp    0x401188 <phase_6+148> ; The it will jump to 148 
-   0x0000000000401183 <+143>:	mov    $0x6032d0,%edx
-   0x0000000000401188 <+148>:	mov    %rdx,0x20(%rsp,%rsi,2) ; 
-   0x000000000040118d <+153>:	add    $0x4,%rsi ; 
-   0x0000000000401191 <+157>:	cmp    $0x18,%rsi
-   0x0000000000401195 <+161>:	je     0x4011ab <phase_6+183>
-   0x0000000000401197 <+163>:	mov    (%rsp,%rsi,1),%ecx
-   0x000000000040119a <+166>:	cmp    $0x1,%ecx
-   0x000000000040119d <+169>:	jle    0x401183 <phase_6+143>
-   0x000000000040119f <+171>:	mov    $0x1,%eax
-   0x00000000004011a4 <+176>:	mov    $0x6032d0,%edx
-   0x00000000004011a9 <+181>:	jmp    0x401176 <phase_6+130>
-   0x00000000004011ab <+183>:	mov    0x20(%rsp),%rbx
-   0x00000000004011b0 <+188>:	lea    0x28(%rsp),%rax
-   0x00000000004011b5 <+193>:	lea    0x50(%rsp),%rsi
-   0x00000000004011ba <+198>:	mov    %rbx,%rcx
-   0x00000000004011bd <+201>:	mov    (%rax),%rdx
-   0x00000000004011c0 <+204>:	mov    %rdx,0x8(%rcx)
-   0x00000000004011c4 <+208>:	add    $0x8,%rax
-   0x00000000004011c8 <+212>:	cmp    %rsi,%rax
-   0x00000000004011cb <+215>:	je     0x4011d2 <phase_6+222>
-   0x00000000004011cd <+217>:	mov    %rdx,%rcx
-   0x00000000004011d0 <+220>:	jmp    0x4011bd <phase_6+201>
-   0x00000000004011d2 <+222>:	movq   $0x0,0x8(%rdx)
-   0x00000000004011da <+230>:	mov    $0x5,%ebp
-   0x00000000004011df <+235>:	mov    0x8(%rbx),%rax
-   0x00000000004011e3 <+239>:	mov    (%rax),%eax
-   0x00000000004011e5 <+241>:	cmp    %eax,(%rbx)
-   0x00000000004011e7 <+243>:	jge    0x4011ee <phase_6+250>
-   0x00000000004011e9 <+245>:	callq  0x40143a <explode_bomb>
-   0x00000000004011ee <+250>:	mov    0x8(%rbx),%rbx
-   0x00000000004011f2 <+254>:	sub    $0x1,%ebp
-   0x00000000004011f5 <+257>:	jne    0x4011df <phase_6+235>
-   0x00000000004011f7 <+259>:	add    $0x50,%rsp
-   0x00000000004011fb <+263>:	pop    %rbx
-   0x00000000004011fc <+264>:	pop    %rbp
-   0x00000000004011fd <+265>:	pop    %r12
-   0x00000000004011ff <+267>:	pop    %r13
-   0x0000000000401201 <+269>:	pop    %r14
-   0x0000000000401203 <+271>:	retq
-End of assembler dump.
 
-```
-The value and the index of the node is 
-332 168 924 691 477 443
-6   5   4   3   2   1
-After sort it 
-5 6 1 2 3 4
 
-The ans is 4 3 2 1 6 5
 
 
 
