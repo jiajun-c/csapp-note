@@ -1,4 +1,8 @@
 #include <stdio.h>
+void f() {
+    printf("SR");
+}
 int main() {
-    printf("Hello\n");
+    f();
+    printf("OK");
 }

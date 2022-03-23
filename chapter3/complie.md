@@ -39,6 +39,8 @@ Intel用术语“字”(word)表示16位数据类型，32位为(double words), 6
 在63位的寄存器中都是用r开头，而在32位中都是用e开头表示的是extand
 架构的不同对应着这些东西的变化，8086 -> IA32 -> x86-64
 ![regisiter](../img/reg.png)
+值得注意的是在我们的C语言程序中，如果你记住了这些寄存器的用法，你会更轻松地进行反汇编的
+操作。
 ### 4.1 操作数指示符
 ![png2](../img/cs2.png)
 各种不同的操作数对应的可能性被分为三种
@@ -141,6 +143,34 @@ We always use the flag to set the contion
 
 ### 6.2 visit the condition code
 
+## 7 process
+过程有多种的实现方式 
+- 函数(function)
+- 方法(method)
+- 子例程(subroutine)
+- 处理函数(handler)
+ 
+这些方法的共性是 
+- 传递控制
+- 传递数据
+- 分配和释放内存
+
+### 7.1 运行时栈
+由于在内存中的存储方式是小端存储，所以其实地址
+扩张的方式是从大到小的。
+每当需要区分配空间时，栈指针就向下走
+
+### 7.2 转移控制
+假设我们的程序在执行的过程中调用了一个函数，那么执行的过程大概是
+在call处将处的地址push入我们的栈中，在进行ret的时候从栈中返回
+该地址。 
+
+### 7.3 数据传输
+当数据的数目小于6个的时候，都是使用寄存器进行存储，当然，
+当你编译的时候不使用优化，会出现全部使用栈区的现象
+
+
+
 ## 10. Combining Control and Data in Machine-Level Programs
 ### 10.1 understanding pointers 
 Just like c
@@ -163,6 +193,7 @@ puts(buf);
 对它进行反汇编之后可以发现其实知识将栈帧指针减去了一定的数目，相当于分配了八个字节的空间，但是一旦超过之后就会发生越界。
 
 Except from the gets, the library function like the strcpy... also has such problem.
+
 
 
 ### 10.4 Some ways to defend the attack
